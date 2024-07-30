@@ -1,3 +1,9 @@
+// const { ethers } = require("hardhat");
+// const { JsonRpcProvider } = require("@ethersproject/providers");
+
+// // Ensure that the provider is correctly initialized
+// const provider = new JsonRpcProvider("https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a");
+
 async function main() {
     // Ensure the Hardhat Runtime Environment is correctly imported
     const hre = require("hardhat");
