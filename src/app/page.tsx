@@ -1,23 +1,21 @@
 "use client";
 
-import Image from "next/image";
-import AddProject from "../actions/addproject";
-import { WalletConnectButton } from "@/actions/ConnectWalletButton";
 import {
   NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
-import Web3ModalProvider from "./context";
+import logo from "../../public/logo.png";
+import Image from "next/image";
+import Web3 from "Web3";
+import "./globals.css";
+// import "@rainbow-me/rainbowkit/styles.css";
+import React from "react";
 import { useState, useEffect } from "react";
 import { QueryClient } from "@tanstack/react-query";
-import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/react";
-
+import AddProject from "@/actions/addproject";
+import Feed from "@/actions/feed";
+import ReadContract from "./../actions/read"
 
 const client = new QueryClient();
 
@@ -28,7 +26,6 @@ export default function Home() {
   }, []);
   return (
     <>
-      {/* <w3m-button /> */}
       <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -40,8 +37,9 @@ export default function Home() {
           </NavigationMenuList>
         </NavigationMenu>
       <main className="flex justify-center items-center h-screen">
-        <AddProject />
+        {isClient && <AddProject web3={new Web3()} account={""} />}
       </main>
+      <ReadContract/>
     </>
   );
 }

@@ -25,3 +25,4 @@ export const config = createConfig({
     [base.id]: http(),
   },
 })
+export default config
