@@ -323,8 +323,8 @@
   "deployedLinkReferences": {},
   "networks": {
     "11155111": {
-      "address": "0x444Cd9F40d2a88Abb72b11c141F1e24046c29111",
-      "transactionHash": "0xf0cf2c2303e5430adfa3a1d58a4179d4a0d8686797499b985bde4da94b350ece"
+      "address": "0x964c2c7Bb1E9A64C48C66F072c923107DE7Ecb55",
+      "transactionHash": "0xe61a780b472788d60304e004d572ee1b77595d571ab9febccf311364424777f8"
     }
   }
 }

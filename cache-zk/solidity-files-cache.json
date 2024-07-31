@@ -38,8 +38,8 @@
       ]
     },
     "C:\\Projects\\Web\\collabman\\contracts\\TaskCon.sol": {
-      "lastModificationDate": 1722321827586,
-      "contentHash": "86e23140137f7b2353cb648844b22b61",
+      "lastModificationDate": 1722395570935,
+      "contentHash": "e02a40d9af6cf43c86b3d50a3e002306",
       "sourceName": "contracts/TaskCon.sol",
       "solcConfig": {
         "version": "0.8.20",

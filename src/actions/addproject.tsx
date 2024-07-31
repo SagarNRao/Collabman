@@ -9,15 +9,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 // import { Table } from "@/components/ui/table";
 
-export default function AddProject() {
+interface NewProjectProps {
+  web3: Web3;
+  account: string;
+}
+
+const AddProject: React.FC<NewProjectProps> = ({web3, account}) => {
   const [postTitle, setPostTitle] = useState<string>("");
   const [postDesc, setPostDesc] = useState<string>("");
   const [postUrl, setpostUrl] = useState<string>("");
   const [postTaskArr, setpostTaskArr] = useState<string>("");
 
   const handlesubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
     const tasks = postTaskArr.split("\n").filter((task) => task.trim() !== "");
+    e.preventDefault();
     try {
       const web3 = new Web3(
         "https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a"
@@ -61,7 +66,7 @@ export default function AddProject() {
 
   return (
     <div>
-      <form>
+      <form onSubmit={handlesubmit}>
         <Textarea
           className="max-w-[300px]"
           value={postTitle}
@@ -95,6 +100,8 @@ export default function AddProject() {
     </div>
   );
 }
+
+export default AddProject;
 
 // function addProject(
 //     string memory _title,

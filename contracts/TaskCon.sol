@@ -95,4 +95,9 @@ contract TaskCon {
             }
         }
     }
+
+    function getfeed() external view returns (project[] memory)
+    {
+        return projects;
+    }
 }
