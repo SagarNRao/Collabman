@@ -15,6 +15,7 @@ import { getContractAddress } from "ethers/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useConfig, useReadContract } from "wagmi";
 import config from "./../app/config";
+import Web3, { PrimitiveTupleType } from "Web3";
 
 const Feed: React.FC = () => {
   const [data, setdata] = useState<any>(null);
@@ -25,8 +26,13 @@ const Feed: React.FC = () => {
 
   const Fetchdata = async () => {
     try {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a"
+      const web3 = new Web3("https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a");
+
+      if (!(window as any).ethereum) {
+        alert("Please install MetaMask");
+      }
+      const provider = new ethers.providers.Web3Provider(
+        (window as any).ethereum
       );
 
       const Contract = new ethers.Contract(
