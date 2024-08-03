@@ -4,8 +4,8 @@ import { headers } from "next/headers";
 
 import { cookieToInitialState } from "wagmi";
 
-import { config } from "./../config/index";
-import Web3ModalProvider from "./context";
+import { config } from "@/config";
+import Web3ModalProvider from "./context/index";
 
 export const metadata: Metadata = {
   title: "Create Next App",

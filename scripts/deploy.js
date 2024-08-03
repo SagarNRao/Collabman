@@ -28,7 +28,7 @@ async function main() {
     console.log("")
     console.log("MyTokenContract deployed at:", myTokenContract.address);
     console.log("MyTokenContract Transaction Hash: ", myTokenContract.deployTransaction.hash);
-    console.log("Deployer's address:", deployer.address);
+    // console.log("Deployer's address:", deployer.address);
 }
 
 main()

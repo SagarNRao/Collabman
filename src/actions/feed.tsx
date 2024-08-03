@@ -17,15 +17,11 @@ import { useConfig, useReadContract } from "wagmi";
 import config from "./../app/config";
 
 const Feed: React.FC = () => {
-  const { data: result } = useReadContract({
-    ...config,
-    functionName: "getfeed",
-  });
-
-  console.log(result);
-
   const [data, setdata] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+// const a = TaskCon.abi;
+//   const b = a as const;
+  
 
   const Fetchdata = async () => {
     try {
@@ -34,17 +30,17 @@ const Feed: React.FC = () => {
       );
 
       const Contract = new ethers.Contract(
-        TaskCon.networks["11155111"].address,
+        TaskCon.networks[11155111].address,
         TaskCon.abi,
         provider
       );
 
       const TaskConAbi = TaskCon.abi;
-      const TaskConAddress = TaskCon.networks["11155111"].address;
+      const TaskConAddress = TaskCon.networks[11155111].address;
 
       try {
-        // const result = await Contract.getfeed();
-        // setdata(result);
+        const result = await Contract.getfeed();
+        setdata(result);
       } catch (error) {
         console.error("Error getting feed: ", error);
       }
@@ -61,7 +57,7 @@ const Feed: React.FC = () => {
 
   return (
     <>
-      <Button onClick={() => console.log(result)}>See what everyone is doing</Button>
+      <Button onClick={() => console.log(data)}>See what everyone is doing</Button>
       {loading ? <p>Loading...</p> : <pre>{JSON.stringify(data, null, 2)}</pre>}
     </>
   );
