@@ -58,7 +58,6 @@ contract TaskCon {
         emit AddProject(msg.sender, Counter);
     }
 
-
     function getProjectTasks(
         uint256 projectId
     ) public view returns (task[] memory) {
@@ -82,7 +81,7 @@ contract TaskCon {
         projects[projectId - 1].tasks.push(newTask);
     }
 
-    function finishtasks(uint256 projectId, string memory tasktitle) public {
+    function finishtask(uint256 projectId, string memory tasktitle) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
         task[] storage tasks = projects[projectId - 1].tasks;
         for (uint256 i = 0; i < tasks.length; i++) {
@@ -96,8 +95,67 @@ contract TaskCon {
         }
     }
 
-    function getfeed() external view returns (project[] memory)
-    {
-        return projects;
+    function getfeed() external view returns (string memory) {
+        project[] memory temporary = new project[](projects.length);
+        uint feedcounter = 0;
+        for (uint i = 0; i < projects.length; i++) {
+            temporary[feedcounter] = projects[i];
+            feedcounter++;
+        }
+
+        project[] memory result = new project[](feedcounter);
+        for (uint i = 0; i < feedcounter; i++) {
+            result[i] = temporary[i];
+        }
+
+        return projectsToJson(result);
+    }
+
+    function projectsToJson(
+        project[] memory projectsArray
+    ) internal pure returns (string memory) {
+        bytes memory jsonBytes = abi.encodePacked("[");
+        for (uint i = 0; i < projectsArray.length; i++) {
+            jsonBytes = abi.encodePacked(
+                jsonBytes,
+                projectToJson(projectsArray[i])
+            );
+            if (i < projectsArray.length - 1) {
+                jsonBytes = abi.encodePacked(jsonBytes, ",");
+            }
+        }
+        jsonBytes = abi.encodePacked(jsonBytes, "]");
+        return string(jsonBytes);
+    }
+
+    function projectToJson(
+        project memory proj
+    ) internal pure returns (string memory) {
+        bytes memory jsonBytes = abi.encodePacked(
+            '{"title":"',
+            proj.title,
+            '","tasks":['
+        );
+        for (uint i = 0; i < proj.tasks.length; i++) {
+            jsonBytes = abi.encodePacked(jsonBytes, taskToJson(proj.tasks[i]));
+            if (i < proj.tasks.length - 1) {
+                jsonBytes = abi.encodePacked(jsonBytes, ",");
+            }
+        }
+        jsonBytes = abi.encodePacked(jsonBytes, "]}");
+        return string(jsonBytes);
+    }
+
+    function taskToJson(task memory tsk) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '{"tasktitle":"',
+                    tsk.tasktitle,
+                    '","isdone":',
+                    tsk.isdone ? "true" : "false",
+                    "}"
+                )
+            );
     }
 }

@@ -4,34 +4,56 @@ import React from "react";
 import TaskCon from "../../artifacts-zk/contracts/TaskCon.sol/TaskCon.json";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import Web3 from "Web3";
+import Web3, { PrimitiveTupleType } from "Web3";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 // import { Table } from "@/components/ui/table";
 
-interface NewProjectProps {
-  web3: Web3;
-  account: string;
+interface Project {
+  title: string;
+  description: string;
+  url: string;
+  tasks: Task[];
 }
 
-const AddProject: React.FC<NewProjectProps> = ({web3, account}) => {
-  const [postTitle, setPostTitle] = useState<string>("");
-  const [postDesc, setPostDesc] = useState<string>("");
-  const [postUrl, setpostUrl] = useState<string>("");
-  const [postTaskArr, setpostTaskArr] = useState<string>("");
+interface Task {
+  tasktitle: string;
+  description: string;
+  isdone: boolean;
+}
 
-  const handlesubmit = async (e: React.FormEvent) => {
-    const tasks = postTaskArr.split("\n").filter((task) => task.trim() !== "");
-    e.preventDefault();
+interface Props {
+  contractInstance: any; // Replace with the actual type of your contract instance
+  account: string; // The current user's Ethereum account
+}
+
+const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [url, setUrl] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+
+  const handleAddTask = () => {
+    const newTask: Task = {
+      tasktitle: newTaskTitle,
+      description: newTaskDescription,
+      isdone: false,
+    };
+    setTasks([...tasks, newTask]);
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     try {
-      const web3 = new Web3(
-        "https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a"
-      );
+      const web3 = new Web3("https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a");
 
       if (!(window as any).ethereum) {
         alert("Please install MetaMask");
       }
-
       const provider = new ethers.providers.Web3Provider(
         (window as any).ethereum
       );
@@ -50,77 +72,84 @@ const AddProject: React.FC<NewProjectProps> = ({web3, account}) => {
         throw new Error("No accounts found--");
       }
       const account = accounts[0];
-      console.log("using account: ", account);
 
-      // Wrap the existing web3 provider with Web3Provider
 
-      const signerAddress = await signer.getAddress();
+      // const posttitle = title;
+      // const postdescription = description;
+      // const posturl = url;
 
-      const title = postTitle;
-      const desc = postDesc;
-      //   const tx = await contract.addProject(postTitle, postDesc)
-    } catch {
-      console.log("oops");
+      const tx = await contract.addProject(title, description, url, tasks);
+      console.log("Transaction successful:", tx);
+
+      // await contractInstance.methods
+      //   .addProject(title, description, url, tasks)
+      //   .send({ from: account });
+      // console.log('Project added successfully!');
+    } catch (error) {
+      console.error("Error adding project:", error);
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handlesubmit}>
-        <Textarea
-          className="max-w-[300px]"
-          value={postTitle}
-          onChange={(e) => setPostTitle(e.target.value)}
-          placeholder="Title"
-          required
+    <form onSubmit={handleSubmit}>
+      <label>
+        Title:
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
+      </label>
+      <br />
+      <label>
+        Description:
         <Textarea
-          className="max-w-[300px]"
-          value={postDesc}
-          onChange={(e) => setPostDesc(e.target.value)}
-          placeholder="Description"
-          required
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
+      </label>
+      <br />
+      <label>
+        URL:
+        <input
+          type="text"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+      </label>
+      <br />
+      <h2>Tasks:</h2>
+      <ul>
+        {tasks.map((task, index) => (
+          <li key={index}>
+            {task.tasktitle}: {task.description}
+          </li>
+        ))}
+      </ul>
+      <label>
+        New Task Title:
+        <input
+          type="text"
+          value={newTaskTitle}
+          onChange={(e) => setNewTaskTitle(e.target.value)}
+        />
+      </label>
+      <br />
+      <label>
+        New Task Description:
         <Textarea
-          className="max-w-[300px]"
-          value={postUrl}
-          onChange={(e) => setpostUrl(e.target.value)}
-          placeholder="Url to your repo"
-          required
+          value={newTaskDescription}
+          onChange={(e) => setNewTaskDescription(e.target.value)}
         />
-        <Textarea
-          className="max-w-[300px]"
-          value={postTaskArr}
-          onChange={(e) => setpostTaskArr(e.target.value)}
-          placeholder="Enter tasks, one per line (will add a better way to make tasks later)"
-          required
-        />
-        <Button type="submit">Submit Post</Button>
-      </form>
-    </div>
+      </label>
+      <br />
+      <Button type="button" onClick={handleAddTask}>
+        Add Task
+      </Button>
+      <br />
+      <Button type="submit">Add Project</Button>
+    </form>
   );
-}
+};
 
-export default AddProject;
-
-// function addProject(
-//     string memory _title,
-//     string memory _description,
-//     string memory _url,
-//     task[] memory _tasks
-// ) public {
-//     Counter++; // Increment the project counter
-
-//     project storage newProject = projects.push();
-//     newProject.title = _title;
-//     newProject.description = _description;
-//     newProject.url = _url;
-//     newProject.projectid = Strings.uintToString(Counter);
-
-//     for (uint256 i = 0; i < _tasks.length; i++) {
-//         task memory newTask = _tasks[i];
-//         newProject.tasks.push(newTask);
-//     }
-
-//     emit AddProject(msg.sender, Counter);
-// }
+export default ProjectForm;
