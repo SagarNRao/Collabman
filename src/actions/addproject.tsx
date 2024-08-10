@@ -14,12 +14,14 @@ interface Project {
   description: string;
   url: string;
   tasks: Task[];
+  ownerman: "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b";
 }
 
 interface Task {
   tasktitle: string;
   description: string;
   isdone: boolean;
+  ownerman: "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b";
 }
 
 interface Props {
@@ -40,6 +42,8 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
       tasktitle: newTaskTitle,
       description: newTaskDescription,
       isdone: false,
+      ownerman:
+        "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b",
     };
     setTasks([...tasks, newTask]);
     setNewTaskTitle("");
@@ -49,7 +53,9 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const web3 = new Web3("https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a");
+      const web3 = new Web3(
+        "https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a"
+      );
 
       if (!(window as any).ethereum) {
         alert("Please install MetaMask");
@@ -73,12 +79,17 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
       }
       const account = accounts[0];
 
-
       // const posttitle = title;
       // const postdescription = description;
       // const posturl = url;
 
-      const tx = await contract.addProject(title, description, url, tasks);
+      const tx = await contract.addProject(
+        title,
+        description,
+        url,
+        tasks,
+        "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b"
+      );
       console.log("Transaction successful:", tx);
 
       // await contractInstance.methods
