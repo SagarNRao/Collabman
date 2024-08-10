@@ -24,12 +24,14 @@ contract TaskCon {
         string url;
         task[] tasks;
         string projectid;
+        string ownerman;
     }
 
     struct task {
         string tasktitle;
         string description;
         bool isdone;
+        string ownerman;
     }
 
     project[] public projects;
@@ -40,7 +42,8 @@ contract TaskCon {
         string memory _title,
         string memory _description,
         string memory _url,
-        task[] memory _tasks
+        task[] memory _tasks,
+        string memory ownerman
     ) public {
         Counter++; // Increment the project counter
 
@@ -49,6 +52,7 @@ contract TaskCon {
         newProject.description = _description;
         newProject.url = _url;
         newProject.projectid = Strings.uintToString(Counter);
+        newProject.ownerman = ownerman;
 
         for (uint256 i = 0; i < _tasks.length; i++) {
             task memory newTask = _tasks[i];
@@ -68,26 +72,28 @@ contract TaskCon {
     function addtasks(
         uint256 projectId,
         string memory tasktitle,
-        string memory description
+        string memory description,
+        string memory ownerman
     ) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
 
         task memory newTask = task({ // Declare a new task here
             tasktitle: tasktitle, // Add initial values as needed
             description: description,
-            isdone: false
+            isdone: false,
+            ownerman: ownerman
         });
 
         projects[projectId - 1].tasks.push(newTask);
     }
 
-    function finishtask(uint256 projectId, string memory tasktitle) public {
+    function finishtask(uint256 projectId, string memory tasktitle, string memory collaborator) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
         task[] storage tasks = projects[projectId - 1].tasks;
         for (uint256 i = 0; i < tasks.length; i++) {
             if (
                 keccak256(abi.encodePacked(tasks[i].tasktitle)) ==
-                keccak256(abi.encodePacked(tasktitle))
+                keccak256(abi.encodePacked(tasktitle)) && keccak256(abi.encodePacked(tasks[i].ownerman)) == keccak256(abi.encodePacked(collaborator))
             ) {
                 tasks[i].isdone = true;
                 break;
