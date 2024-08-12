@@ -15,7 +15,7 @@ contract TaskCon {
     constructor() {
         owner = msg.sender;
         // tokenaddress = address(new MyTokenContract());
-        Counter = 0;
+        Counter = 1;
     }
 
     struct project {
@@ -37,6 +37,11 @@ contract TaskCon {
     project[] public projects;
 
     event AddProject(address recipient, uint256 projectid);
+    event TaskFinished(
+        uint256 projectId,
+        string tasktitle,
+        string collaborator
+    );
 
     function addProject(
         string memory _title,
@@ -87,15 +92,29 @@ contract TaskCon {
         projects[projectId - 1].tasks.push(newTask);
     }
 
-    function finishtask(uint256 projectId, string memory tasktitle, string memory collaborator) public {
-        require(projectId > 0 && projectId <= Counter, "Invalid project ID");
-        task[] storage tasks = projects[projectId - 1].tasks;
-        for (uint256 i = 0; i < tasks.length; i++) {
+    function finishtask(
+        string memory projectTitle,
+        string memory tasktitle,
+        string memory collaborator
+    ) public {
+        for (uint256 i = 0; i < projects.length; i++) {
             if (
-                keccak256(abi.encodePacked(tasks[i].tasktitle)) ==
-                keccak256(abi.encodePacked(tasktitle)) && keccak256(abi.encodePacked(tasks[i].ownerman)) == keccak256(abi.encodePacked(collaborator))
+                keccak256(abi.encodePacked(projects[i].title)) ==
+                keccak256(abi.encodePacked(projectTitle))
             ) {
-                tasks[i].isdone = true;
+                task[] storage tasks = projects[i].tasks;
+                for (uint256 j = 0; j < tasks.length; j++) {
+                    if (
+                        keccak256(abi.encodePacked(tasks[j].tasktitle)) ==
+                        keccak256(abi.encodePacked(tasktitle)) &&
+                        keccak256(abi.encodePacked(tasks[j].ownerman)) ==
+                        keccak256(abi.encodePacked(collaborator))
+                    ) {
+                        projects[i].tasks[j].isdone = true;
+                        emit TaskFinished(i + 1, tasktitle, collaborator); // Emit the event
+                        break;
+                    }
+                }
                 break;
             }
         }
@@ -116,7 +135,6 @@ contract TaskCon {
 
         return projectsToJson(result);
     }
-
     function projectsToJson(
         project[] memory projectsArray
     ) internal pure returns (string memory) {
@@ -138,7 +156,9 @@ contract TaskCon {
         project memory proj
     ) internal pure returns (string memory) {
         bytes memory jsonBytes = abi.encodePacked(
-            '{"title":"',
+            '{"projectid":"',
+            proj.projectid,
+            '","title":"',
             proj.title,
             '","tasks":['
         );
