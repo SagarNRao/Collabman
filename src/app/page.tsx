@@ -16,6 +16,7 @@ import { QueryClient } from "@tanstack/react-query";
 // import AddProject from "@/actions/addproject";
 import ProjectForm from "@/actions/addproject";
 import Feed from "@/actions/feed";
+import EditProjectTitle from "@/actions/edittitle";
 import ReadContract from "@/actions/read";
 import { ethers } from "ethers";
 import TaskCon from "../../artifacts-zk/contracts/TaskCon.sol/TaskCon.json";
@@ -59,6 +60,7 @@ export default function Home() {
         {isClient && <ProjectForm contractInstance={contract} account={""} />}
       </main>
       <Feed />
+      <EditProjectTitle/>
     </>
   );
 }
