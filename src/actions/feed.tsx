@@ -108,7 +108,7 @@ const Feed: React.FC = () => {
     console.log("Sender:", sender);
 
     try {
-      const tx = await ContractWithSigner.finishtask(ProjectTitle, taskTitle, sender);
+      const tx = await ContractWithSigner.finishtask(1,1);
       console.log(tx);
       console.log(tx.receipt);
       console.log(tx.data);

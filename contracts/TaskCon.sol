@@ -30,18 +30,14 @@ contract TaskCon {
     struct task {
         string tasktitle;
         string description;
-        bool isdone;
+        uint256 isdone;
         string ownerman;
     }
 
     project[] public projects;
 
     event AddProject(address recipient, uint256 projectid);
-    event TaskFinished(
-        uint256 projectId,
-        string tasktitle,
-        string collaborator
-    );
+    event TaskFinished(uint256 projectId, uint256 taskId);
 
     function addProject(
         string memory _title,
@@ -85,42 +81,33 @@ contract TaskCon {
         task memory newTask = task({ // Declare a new task here
             tasktitle: tasktitle, // Add initial values as needed
             description: description,
-            isdone: false,
+            isdone: 0,
             ownerman: ownerman
         });
 
         projects[projectId - 1].tasks.push(newTask);
     }
 
-    function finishtask(
-        string memory projectTitle,
-        string memory tasktitle,
-        string memory collaborator
-    ) public {
-        for (uint256 i = 0; i < projects.length; i++) {
-            if (
-                keccak256(abi.encodePacked(projects[i].title)) ==
-                keccak256(abi.encodePacked(projectTitle))
-            ) {
-                task[] storage tasks = projects[i].tasks;
-                for (uint256 j = 0; j < tasks.length; j++) {
-                    if (
-                        keccak256(abi.encodePacked(tasks[j].tasktitle)) ==
-                        keccak256(abi.encodePacked(tasktitle)) &&
-                        keccak256(abi.encodePacked(tasks[j].ownerman)) ==
-                        keccak256(abi.encodePacked(collaborator))
-                    ) {
-                        projects[i].tasks[j].isdone = true;
-                        emit TaskFinished(i + 1, tasktitle, collaborator); // Emit the event
-                        break;
-                    }
-                }
-                break;
-            }
-        }
+    function finishtask(uint256 projectId, uint256 taskId) public {
+        require(
+            projectId > 0 && projectId <= projects.length,
+            "Invalid project ID"
+        );
+
+        require(
+            taskId > 0 && taskId <= projects[projectId - 1].tasks.length,
+            "Invalid task ID"
+        );
+
+        task[] storage tasks = projects[projectId - 1].tasks;
+        tasks[taskId - 1].isdone = 1;
+        emit TaskFinished(projectId, taskId); // Emit the event
     }
 
-    function editProjectTitle(uint256 projectId, string memory newTitle) public {
+    function editProjectTitle(
+        uint256 projectId,
+        string memory newTitle
+    ) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
         projects[projectId - 1].title = newTitle;
     }
@@ -184,7 +171,7 @@ contract TaskCon {
                     '{"tasktitle":"',
                     tsk.tasktitle,
                     '","isdone":',
-                    tsk.isdone ? "true" : "false",
+                    tsk.isdone == 1 ? "true" : "false",
                     "}"
                 )
             );

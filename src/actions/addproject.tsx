@@ -20,7 +20,7 @@ interface Project {
 interface Task {
   tasktitle: string;
   description: string;
-  isdone: boolean;
+  isdone: number;
   ownerman: "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b";
 }
 
@@ -42,7 +42,7 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
     const newTask: Task = {
       tasktitle: newTaskTitle,
       description: newTaskDescription,
-      isdone: false,
+      isdone: 0,
       ownerman:
         "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b",
     };
@@ -89,7 +89,7 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
         description,
         url,
         tasks,
-        "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b"
+        "0xe30c9B6974fb0a1469D645569700C9591E041394"
       );
       console.log("Transaction successful:", tx);
 

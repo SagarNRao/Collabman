@@ -60,7 +60,7 @@ export default function Home() {
         {isClient && <ProjectForm contractInstance={contract} account={""} />}
       </main>
       <Feed />
-      <EditProjectTitle/>
+      {/* <EditProjectTitle/> */}
     </>
   );
 }
