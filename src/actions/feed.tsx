@@ -65,6 +65,7 @@ const Feed: React.FC = () => {
 
       try {
         const result = await Contract.getfeed();
+        console.log(result)
         const parsedData = JSON.parse(result);
         setdata(parsedData);
       } catch (error) {

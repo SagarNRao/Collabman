@@ -120,6 +120,11 @@ contract TaskCon {
         }
     }
 
+    function editProjectTitle(uint256 projectId, string memory newTitle) public {
+        require(projectId > 0 && projectId <= Counter, "Invalid project ID");
+        projects[projectId - 1].title = newTitle;
+    }
+
     function getfeed() external view returns (string memory) {
         project[] memory temporary = new project[](projects.length);
         uint feedcounter = 0;

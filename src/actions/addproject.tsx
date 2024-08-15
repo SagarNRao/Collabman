@@ -33,7 +33,8 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<[Task, ...Task[]]>([] as unknown as [Task, ...Task[]]);
+
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
 
@@ -45,7 +46,7 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
       ownerman:
         "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b",
     };
-    setTasks([...tasks, newTask]);
+    setTasks([...tasks, newTask] as [Task, ...Task[]]);
     setNewTaskTitle("");
     setNewTaskDescription("");
   };
