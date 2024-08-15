@@ -5,6 +5,14 @@ import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
 import Web3 from "Web3";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const ProjectIds: string[] = [];
 const ProjectTitles: string[] = [];
@@ -65,7 +73,7 @@ const Feed: React.FC = () => {
 
       try {
         const result = await Contract.getfeed();
-        console.log(result)
+        console.log(result);
         const parsedData = JSON.parse(result);
         setdata(parsedData);
       } catch (error) {
@@ -108,7 +116,7 @@ const Feed: React.FC = () => {
     console.log("Sender:", sender);
 
     try {
-      const tx = await ContractWithSigner.finishtask(1,1);
+      const tx = await ContractWithSigner.finishtask(1, 1);
       console.log(tx);
       console.log(tx.receipt);
       console.log(tx.data);
@@ -147,40 +155,53 @@ const Feed: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    Fetchdata();
+  }, []);
+
   return (
     <>
-      <Button onClick={Fetchdata}>See what everyone is doing</Button>
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div>
-          {data.map((project: Project, index: number) => (
-            <div key={index} style={{ marginBottom: "20px" }}>
-              <h2>{project.title}</h2>
-              <p>{project.description}</p>
-              <ul>
-                {project.tasks.map((task: Task, taskIndex: number) => (
-                  <li key={taskIndex}>
-                    <span>{task.tasktitle}</span>
-                    {task.isdone ? (
-                      <Badge>Done</Badge>
-                    ) : (
-                      <>
-                        <Badge>Not done</Badge>
-                        <Button
-                          onClick={() =>
-                            MarkAsDone(project.title, task.tasktitle)
-                          }
-                        >
-                          Mark as done
-                        </Button>
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div id="1" className="flex justify-center">
+          <main
+            className="flex flex-col justify-center"
+            style={{ maxWidth: "750px", minWidth:"538px" }}
+          >
+            {data.map((project: Project, index: number) => (
+              <Card key={index} className="p-5" style={{ marginBottom: "20px" }}>
+                <CardHeader>
+                  <CardTitle>{project.title}</CardTitle>
+                  <CardDescription>
+                    re
+                    {project.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {project.tasks.map((task: Task, taskIndex: number) => (
+                    <p key={taskIndex}>
+                      <span>{task.tasktitle}</span>
+                      {task.isdone ? (
+                        <Badge>Done</Badge>
+                      ) : (
+                        <>
+                          <Badge>Not done</Badge>
+                          <Button
+                            onClick={() =>
+                              MarkAsDone(project.title, task.tasktitle)
+                            }
+                          >
+                            Mark as done
+                          </Button>
+                        </>
+                      )}
+                    </p>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
+          </main>
         </div>
       )}
     </>
