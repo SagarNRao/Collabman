@@ -170,7 +170,7 @@ const Feed: React.FC = () => {
             style={{ maxWidth: "750px", minWidth:"538px" }}
           >
             {data.map((project: Project, index: number) => (
-              <Card key={index} className="p-5" style={{ marginBottom: "20px" }}>
+              <Card id="1" key={index} style={{ marginBottom: "20px", padding:"5px" }}>
                 <CardHeader>
                   <CardTitle>{project.title}</CardTitle>
                   <CardDescription>

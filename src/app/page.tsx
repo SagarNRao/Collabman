@@ -20,6 +20,8 @@ import EditProjectTitle from "@/actions/edittitle";
 import ReadContract from "@/actions/read";
 import { ethers } from "ethers";
 import TaskCon from "../../artifacts-zk/contracts/TaskCon.sol/TaskCon.json";
+import BoxReveal from "@/components/magicui/box-reveal";
+import Meteors from "@/components/magicui/meteors";
 
 const web3 = new Web3(
   "https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a"
@@ -46,14 +48,22 @@ export default function Home() {
   }, []);
   return (
     <>
+      <div className="flex">
+        <BoxReveal boxColor={"#5046e6"} duration={0.5}>
+          <p className="text-[3.5rem] font-semibold">
+            Hello there<span className="text-[#5046e6]">.</span>
+          </p>
+        </BoxReveal>
+        <div style={{ width: "900px" }}></div>
+        <w3m-button />
+      </div>
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
             <div style={{ width: "1200px" }}></div>
           </NavigationMenuItem>
-          <NavigationMenuItem className="flex">
-            <w3m-button />
-          </NavigationMenuItem>
+          <NavigationMenuItem></NavigationMenuItem>
+          <NavigationMenuItem className="flex"></NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
       <main className="flex justify-center items-center h-screen">
