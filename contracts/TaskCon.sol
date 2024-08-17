@@ -14,7 +14,7 @@ contract TaskCon {
 
     constructor() {
         owner = msg.sender;
-        // tokenaddress = address(new MyTokenContract());
+        tokenaddress = address(new MyTokenContract());
         Counter = 0;
     }
 
@@ -30,40 +30,13 @@ contract TaskCon {
     struct task {
         string tasktitle;
         string description;
-        uint256 isdone;
-        string ownerman;
-        string collaborator;
+        bool isdone;
     }
 
-    struct attempt {
-        uint256 projectid;
-        string tasktitle;
-        string taskid;
-        string collaborator;
-        uint256 status;
-    }
     project[] public projects;
     attempt[] public attempts;
 
-    event AddProject(address recipient, uint256 projectid);
-    event TaskFinished(uint256 projectId, uint256 taskId);
-
-    function create_attempt(
-        uint256 projectId,
-        string memory taskId,
-        string memory tasktitle,
-        string memory collaborator
-    ) public {
-        attempt memory NewAttempt = attempt({
-            projectid: projectId,
-            tasktitle: tasktitle,
-            taskid: taskId,
-            collaborator: collaborator,
-            status: 0
-        });
-
-        attempts.push(NewAttempt);
-    }
+    event AddProject(address recipient, uint projectid);
 
     function addProject(
         string memory _title,
@@ -103,116 +76,20 @@ contract TaskCon {
         string memory ownerman
     ) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
-
-        task memory newTask = task({ // Declare a new task here
-            tasktitle: tasktitle, // Add initial values as needed
-            description: description,
-            isdone: 0,
-            ownerman: ownerman,
-            collaborator: ""
-        });
-
-        // for (uint i = 0;i< _attempts.length;i++){
-        //     attempt memory newAttempt = _attempts[i];
-        // }
-
         projects[projectId - 1].tasks.push(newTask);
     }
 
-
-    function finishtask(
-        uint256 projectId,
-        uint256 taskId,
-        string memory collaborator
-    ) public {
-        require(
-            projectId > 0 && projectId <= projects.length,
-            "Invalid project ID"
-        );
-
-        require(
-            taskId > 0 && taskId <= projects[projectId - 1].tasks.length,
-            "Invalid task ID"
-        );
-
-        task[] storage tasks = projects[projectId - 1].tasks;
-        tasks[taskId - 1].isdone = 1;
-        tasks[taskId - 1].collaborator = collaborator;
-        emit TaskFinished(projectId, taskId); // Emit the event
-    }
-
-    function editProjectTitle(
-        uint256 projectId,
-        string memory newTitle
-    ) public {
+    function finishtasks(uint256 projectId, string memory tasktitle) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
-        projects[projectId - 1].title = newTitle;
-    }
-
-    function getfeed() external view returns (string memory) {
-        project[] memory temporary = new project[](projects.length);
-        uint feedcounter = 0;
-        for (uint i = 0; i < projects.length; i++) {
-            temporary[feedcounter] = projects[i];
-            feedcounter++;
-        }
-
-        project[] memory result = new project[](feedcounter);
-        for (uint i = 0; i < feedcounter; i++) {
-            result[i] = temporary[i];
-        }
-
-        git filter-repo --path .env --invert-paths
-
-        return projectsToJson(result);
-    }
-    function projectsToJson(
-        project[] memory projectsArray
-    ) internal pure returns (string memory) {
-        bytes memory jsonBytes = abi.encodePacked("[");
-        for (uint i = 0; i < projectsArray.length; i++) {
-            jsonBytes = abi.encodePacked(
-                jsonBytes,
-                projectToJson(projectsArray[i])
-            );
-            if (i < projectsArray.length - 1) {
-                jsonBytes = abi.encodePacked(jsonBytes, ",");
+        task[] storage tasks = projects[projectId - 1].tasks;
+        for (uint256 i = 0; i < tasks.length; i++) {
+            if (
+                keccak256(abi.encodePacked(tasks[i].tasktitle)) ==
+                keccak256(abi.encodePacked(tasktitle))
+            ) {
+                tasks[i].isFinished = true;
+                break;
             }
         }
-        jsonBytes = abi.encodePacked(jsonBytes, "]");
-        return string(jsonBytes);
-    }
-
-    function projectToJson(
-        project memory proj
-    ) internal pure returns (string memory) {
-        bytes memory jsonBytes = abi.encodePacked(
-            '{"projectid":"',
-            proj.projectid,
-            '","title":"',
-            proj.title,
-            '","tasks":['
-        );
-        for (uint i = 0; i < proj.tasks.length; i++) {
-            jsonBytes = abi.encodePacked(jsonBytes, taskToJson(proj.tasks[i]));
-            if (i < proj.tasks.length - 1) {
-                jsonBytes = abi.encodePacked(jsonBytes, ",");
-            }
-        }
-        jsonBytes = abi.encodePacked(jsonBytes, "]}");
-        return string(jsonBytes);
-    }
-
-    function taskToJson(task memory tsk) internal pure returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '{"tasktitle":"',
-                    tsk.tasktitle,
-                    '","isdone":',
-                    tsk.isdone == 1 ? "true" : "false",
-                    "}"
-                )
-            );
     }
 }
