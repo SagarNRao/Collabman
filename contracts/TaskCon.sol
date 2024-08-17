@@ -15,7 +15,7 @@ contract TaskCon {
     constructor() {
         owner = msg.sender;
         // tokenaddress = address(new MyTokenContract());
-        Counter = 1;
+        Counter = 0;
     }
 
     struct project {
@@ -32,12 +32,38 @@ contract TaskCon {
         string description;
         uint256 isdone;
         string ownerman;
+        string collaborator;
     }
 
+    struct attempt {
+        uint256 projectid;
+        string tasktitle;
+        string taskid;
+        string collaborator;
+        uint256 status;
+    }
     project[] public projects;
+    attempt[] public attempts;
 
     event AddProject(address recipient, uint256 projectid);
     event TaskFinished(uint256 projectId, uint256 taskId);
+
+    function create_attempt(
+        uint256 projectId,
+        string memory taskId,
+        string memory tasktitle,
+        string memory collaborator
+    ) public {
+        attempt memory NewAttempt = attempt({
+            projectid: projectId,
+            tasktitle: tasktitle,
+            taskid: taskId,
+            collaborator: collaborator,
+            status: 0
+        });
+
+        attempts.push(NewAttempt);
+    }
 
     function addProject(
         string memory _title,
@@ -82,13 +108,23 @@ contract TaskCon {
             tasktitle: tasktitle, // Add initial values as needed
             description: description,
             isdone: 0,
-            ownerman: ownerman
+            ownerman: ownerman,
+            collaborator: ""
         });
+
+        // for (uint i = 0;i< _attempts.length;i++){
+        //     attempt memory newAttempt = _attempts[i];
+        // }
 
         projects[projectId - 1].tasks.push(newTask);
     }
 
-    function finishtask(uint256 projectId, uint256 taskId) public {
+
+    function finishtask(
+        uint256 projectId,
+        uint256 taskId,
+        string memory collaborator
+    ) public {
         require(
             projectId > 0 && projectId <= projects.length,
             "Invalid project ID"
@@ -101,6 +137,7 @@ contract TaskCon {
 
         task[] storage tasks = projects[projectId - 1].tasks;
         tasks[taskId - 1].isdone = 1;
+        tasks[taskId - 1].collaborator = collaborator;
         emit TaskFinished(projectId, taskId); // Emit the event
     }
 
@@ -124,6 +161,8 @@ contract TaskCon {
         for (uint i = 0; i < feedcounter; i++) {
             result[i] = temporary[i];
         }
+
+        git filter-repo --path .env --invert-paths
 
         return projectsToJson(result);
     }
