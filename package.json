@@ -29,10 +29,7 @@
     "framer-motion": "^11.3.28",
     "lucide-react": "^0.417.0",
     "next": "14.2.5",
-<<<<<<< HEAD
     "octokit": "^4.0.2",
-=======
->>>>>>> e582eb0aa0835f2093875613c4944bb6a127d70b
     "pino-pretty": "^11.2.2",
     "react": "^18",
     "react-dom": "^18",

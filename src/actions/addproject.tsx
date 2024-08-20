@@ -32,6 +32,7 @@ interface Task {
   description: string;
   isdone: number;
   ownerman: "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b";
+  collaborator: string;
 }
 
 interface Props {
@@ -61,6 +62,7 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
       isdone: 0,
       ownerman:
         "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b",
+      collaborator: "",
     };
     setTasks([...tasks, newTask] as [Task, ...Task[]]);
     setNewTaskTitle("");
@@ -168,6 +170,7 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
                         const newCardContents = [...cardContents];
                         newCardContents[index].title = e.target.value;
                         setCardContents(newCardContents);
+                        setNewTaskTitle(e.target.value);
                       }}
                       placeholder="Task title"
                     />
@@ -178,6 +181,7 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
                         const newCardContents = [...cardContents];
                         newCardContents[index].description = e.target.value;
                         setCardContents(newCardContents);
+                        setNewTaskDescription(e.target.value);
                       }}
                       placeholder="Task description"
                     />
@@ -192,7 +196,9 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
           </div>
         </CardContent>
         <CardContent>
-          <Button type="submit" style={{width:"100%"}}>Add Project</Button>
+          <Button type="submit" style={{ width: "100%" }}>
+            Add Project
+          </Button>
         </CardContent>
       </Card>
     </form>

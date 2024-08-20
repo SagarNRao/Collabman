@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.19;
 import "./Strings.sol";
+
 // import "./Tokens.sol";
 /**
  * @title TaskCon
@@ -14,8 +15,16 @@ contract TaskCon {
 
     constructor() {
         owner = msg.sender;
-        tokenaddress = address(new MyTokenContract());
+        // tokenaddress = address(new MyTokenContract());
         Counter = 0;
+    }
+
+    struct attempt {
+        uint256 projectid;
+        string tasktitle;
+        uint256 taskid;
+        string collaborator;
+        uint256 status;
     }
 
     struct project {
@@ -30,13 +39,33 @@ contract TaskCon {
     struct task {
         string tasktitle;
         string description;
-        bool isdone;
+        uint256 isdone;
+        string ownerman;
+        string collaborator;
     }
 
     project[] public projects;
     attempt[] public attempts;
 
-    event AddProject(address recipient, uint projectid);
+    event AddProject(address recipient, uint256 projectid);
+    event TaskFinished(uint256 projectId, uint256 taskId);
+
+    function create_attempt(
+        uint256 projectId,
+        uint256 taskId,
+        string memory tasktitle,
+        string memory collaborator
+    ) public {
+        attempt memory NewAttempt = attempt({
+            projectid: projectId,
+            tasktitle: tasktitle,
+            taskid: taskId,
+            collaborator: collaborator,
+            status: 0
+        });
+
+        attempts.push(NewAttempt);
+    }
 
     function addProject(
         string memory _title,
@@ -62,9 +91,11 @@ contract TaskCon {
         emit AddProject(msg.sender, Counter);
     }
 
-    function getProjectTasks(
-        uint256 projectId
-    ) public view returns (task[] memory) {
+    function getProjectTasks(uint256 projectId)
+        public
+        view
+        returns (task[] memory)
+    {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
         return projects[projectId - 1].tasks;
     }
@@ -76,20 +107,187 @@ contract TaskCon {
         string memory ownerman
     ) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
+
+        task memory newTask = task({ // Declare a new task here
+            tasktitle: tasktitle, // Add initial values as needed
+            description: description,
+            isdone: 0,
+            ownerman: ownerman,
+            collaborator: ""
+        });
+
+        // for (uint i = 0;i< _attempts.length;i++){
+        //     attempt memory newAttempt = _attempts[i];
+        // }
+
         projects[projectId - 1].tasks.push(newTask);
     }
 
-    function finishtasks(uint256 projectId, string memory tasktitle) public {
-        require(projectId > 0 && projectId <= Counter, "Invalid project ID");
+    function finishtask(
+        uint256 projectId,
+        uint256 taskId,
+        string memory collaborator
+    ) public {
+        require(
+            projectId > 0 && projectId <= projects.length,
+            "Invalid project ID"
+        );
+
+        require(
+            taskId > 0 && taskId <= projects[projectId - 1].tasks.length,
+            "Invalid task ID"
+        );
+
         task[] storage tasks = projects[projectId - 1].tasks;
-        for (uint256 i = 0; i < tasks.length; i++) {
+        tasks[taskId - 1].isdone = 1;
+        tasks[taskId - 1].collaborator = collaborator;
+
+        // find the attempt whose projectid and taskid match the parameters and change its status
+        for (uint256 i = 0; i < attempts.length; i++) {
             if (
-                keccak256(abi.encodePacked(tasks[i].tasktitle)) ==
-                keccak256(abi.encodePacked(tasktitle))
+                attempts[i].projectid == projectId &&
+                attempts[i].taskid == taskId
             ) {
-                tasks[i].isFinished = true;
+                attempts[i].status = 1;
                 break;
             }
         }
+
+        emit TaskFinished(projectId, taskId); // Emit the event
+    }
+
+    function editProjectTitle(uint256 projectId, string memory newTitle)
+        public
+    {
+        require(projectId > 0 && projectId <= Counter, "Invalid project ID");
+        projects[projectId - 1].title = newTitle;
+    }
+
+    function getfeed() external view returns (string memory) {
+        project[] memory temporary = new project[](projects.length);
+        uint256 feedcounter = 0;
+        for (uint256 i = 0; i < projects.length; i++) {
+            temporary[feedcounter] = projects[i];
+            feedcounter++;
+        }
+
+        project[] memory result = new project[](feedcounter);
+        for (uint256 i = 0; i < feedcounter; i++) {
+            result[i] = temporary[i];
+        }
+
+        return projectsToJson(result);
+    }
+
+    function projectsToJson(project[] memory projectsArray)
+        internal
+        pure
+        returns (string memory)
+    {
+        bytes memory jsonBytes = abi.encodePacked("[");
+        for (uint256 i = 0; i < projectsArray.length; i++) {
+            jsonBytes = abi.encodePacked(
+                jsonBytes,
+                projectToJson(projectsArray[i])
+            );
+            if (i < projectsArray.length - 1) {
+                jsonBytes = abi.encodePacked(jsonBytes, ",");
+            }
+        }
+        jsonBytes = abi.encodePacked(jsonBytes, "]");
+        return string(jsonBytes);
+    }
+
+    function projectToJson(project memory proj)
+        internal
+        pure
+        returns (string memory)
+    {
+        bytes memory jsonBytes = abi.encodePacked(
+            '{"projectid":"',
+            proj.projectid,
+            '","title":"',
+            proj.title,
+            '","tasks":['
+        );
+        for (uint256 i = 0; i < proj.tasks.length; i++) {
+            jsonBytes = abi.encodePacked(jsonBytes, taskToJson(proj.tasks[i]));
+            if (i < proj.tasks.length - 1) {
+                jsonBytes = abi.encodePacked(jsonBytes, ",");
+            }
+        }
+        jsonBytes = abi.encodePacked(jsonBytes, "]}");
+        return string(jsonBytes);
+    }
+
+    function taskToJson(task memory tsk) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '{"tasktitle":"',
+                    tsk.tasktitle,
+                    '","isdone":',
+                    tsk.isdone == 1 ? "true" : "false",
+                    "}"
+                )
+            );
+    }
+
+    function getattempts() external view returns (string memory) {
+        attempt[] memory temporary = new attempt[](attempts.length);
+        uint256 attemptcounter = 0;
+        for (uint256 i = 0; i < attempts.length; i++) {
+            temporary[attemptcounter] = attempts[i];
+            attemptcounter++;
+        }
+
+        attempt[] memory result = new attempt[](attemptcounter);
+        for (uint256 i = 0; i < attemptcounter; i++) {
+            result[i] = temporary[i];
+        }
+
+        return attemptsToJson(result);
+    }
+
+    function attemptsToJson(attempt[] memory attemptsArray)
+        internal
+        pure
+        returns (string memory)
+    {
+        bytes memory jsonBytes = abi.encodePacked("[");
+        for (uint256 i = 0; i < attemptsArray.length; i++) {
+            jsonBytes = abi.encodePacked(
+                jsonBytes,
+                attemptToJson(attemptsArray[i])
+            );
+            if (i < attemptsArray.length - 1) {
+                jsonBytes = abi.encodePacked(jsonBytes, ",");
+            }
+        }
+        jsonBytes = abi.encodePacked(jsonBytes, "]");
+        return string(jsonBytes);
+    }
+
+    function attemptToJson(attempt memory att)
+        internal
+        pure
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    '{"projectid":"',
+                    Strings.uintToString(att.projectid),
+                    '","tasktitle":"',
+                    att.tasktitle,
+                    '","taskid":"',
+                    Strings.uintToString(att.taskid),
+                    '","collaborator":"',
+                    att.collaborator,
+                    '","status":',
+                    att.status == 1 ? "true" : "false",
+                    "}"
+                )
+            );
     }
 }

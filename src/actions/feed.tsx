@@ -14,15 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const ProjectIds: string[] = [];
-const ProjectTitles: string[] = [];
-const ProjectDescs: string[] = [];
-const Urls: string[] = [];
-const Tasks: { title: string; desc: string; isDone: boolean }[] = [];
-const TaskTitle: string[] = [];
-const TaskDesc: string[] = [];
-const TaskStatus: boolean[] = [];
-
 interface Project {
   title: string;
   description: string;
@@ -39,11 +30,36 @@ interface Task {
   ownerman: "0x6B3eaB2E94435D2F808D75eAfDA7C9431706eBF2";
 }
 
+interface Attempt {
+  projectId: number;
+  taskId: number;
+  tasktitle: string;
+  collaborator: string;
+  status: boolean;
+}
+
+const ProjectIds: string[] = [];
+const ProjectTitles: string[] = [];
+const ProjectDescs: string[] = [];
+const Urls: string[] = [];
+// const Tasks: { title: string; desc: string; isDone: boolean }[] = [];
+const Tasks: {
+  title: string;
+  desc: string;
+  isDone: boolean;
+  attempt: Attempt;
+}[] = [];
+const TaskTitle: string[] = [];
+const TaskDesc: string[] = [];
+const TaskStatus: boolean[] = [];
+const Attempts: Attempt[] = [];
+
 let Counter: number = ProjectTitles.length + 1;
 console.log(Counter);
 
-const Feed: React.FC = () => {
+const Feed = () => {
   const [data, setdata] = useState<any>(null);
+  const [attemptsdata, setattemptsdata] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const web3 = new Web3(
@@ -66,6 +82,38 @@ const Feed: React.FC = () => {
     provider.getSigner()
   );
 
+  const FetchAttemptsData = async () => {
+    try {
+      const TaskConAbi = TaskCon.abi;
+      const TaskConAddress = TaskCon.networks[11155111].address;
+
+      try {
+        const result = await Contract.getattempts();
+        console.log(result);
+        const parsedData = JSON.parse(result);
+        console.log("parsed data: ",parsedData);
+        parsedData.forEach((attempt:Attempt) => {
+          Attempts.push({
+            projectId: attempt.projectId,
+            taskId: attempt.taskId,
+            tasktitle: attempt.tasktitle,
+            collaborator: attempt.collaborator,
+            status: attempt.status,
+          });
+        });
+        setattemptsdata(result);
+        console.log("Attempts after parsing: ", Attempts);
+
+      } catch (error) {
+        console.error("Error getting feed: ", error);
+      }
+    } catch {
+      console.log("oops");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const Fetchdata = async () => {
     try {
       const TaskConAbi = TaskCon.abi;
@@ -73,7 +121,7 @@ const Feed: React.FC = () => {
 
       try {
         const result = await Contract.getfeed();
-        console.log(result);
+        // console.log(result);
         const parsedData = JSON.parse(result);
         setdata(parsedData);
       } catch (error) {
@@ -86,31 +134,53 @@ const Feed: React.FC = () => {
     }
   };
 
-  if (data) {
-    data.forEach((project: Project) => {
-      ProjectTitles.push(project.title);
-      ProjectDescs.push(project.description);
-      Urls.push(project.url);
-      // Add projectid to the array
-      ProjectIds.push(project.projectid);
+  async function FetchAndProc() {
+    await FetchAttemptsData();
 
-      project.tasks.forEach((task: Task) => {
-        TaskTitle.push(task.tasktitle);
-        TaskDesc.push(task.description);
-        TaskStatus.push(task.isdone);
+    try {
+      if (data && attemptsdata) {
+        data.forEach((project: Project) => {
+          ProjectTitles.push(project.title);
+          ProjectDescs.push(project.description);
+          Urls.push(project.url);
+          // Add projectid to the array
+          ProjectIds.push(project.projectid);
 
-        Tasks.push({
-          title: task.tasktitle,
-          desc: task.description,
-          isDone: task.isdone,
+          project.tasks.forEach((task: Task) => {
+            TaskTitle.push(task.tasktitle);
+            TaskDesc.push(task.description);
+            TaskStatus.push(task.isdone);
+
+            console.log("Before ree: ");
+
+            try {
+              for (let i = 0; i < Attempts.length; i++) {
+                if (
+                  Attempts[i].projectId.toString() == project.projectid &&
+                  Attempts[i].tasktitle.toString() == task.tasktitle
+                ) {
+                  Tasks.push({
+                    title: task.tasktitle,
+                    desc: task.description,
+                    isDone: task.isdone,
+                    attempt: Attempts[i],
+                  });
+
+                  console.log("Attempts: ", Attempts);
+                } else {
+                  console.log("no");
+                }
+              }
+            } catch (error) {
+              console.log("error processing: ", error);
+            }
+          });
         });
-      });
-    });
-  } else {
-    console.log("not fetched");
+      } else {
+      }
+    } catch {}
   }
-
-  const MarkAsDone = async (ProjectTitle: string, taskTitle: string) => {
+  const MarkAsDone = async (ProjectId: string, taskTitle: string) => {
     const sender = (window as any).ethereum.selectedAddress.toString();
     console.log("Task Title:", taskTitle);
     console.log("Sender:", sender);
@@ -155,6 +225,29 @@ const Feed: React.FC = () => {
     }
   };
 
+  const CreateAttempt = async (
+    ProjectId: string,
+    TaskId: number,
+    TaskTitle: string
+  ) => {
+    const Collaborator = (window as any).ethereum.selectedAddress.toString();
+
+    const PId = parseInt(ProjectId, 10);
+
+    try {
+      const tx = await ContractWithSigner.create_attempt(
+        PId,
+        TaskId,
+        TaskTitle,
+        Collaborator
+      );
+    } catch (error) {
+      console.log("Error creating attempt: ", error);
+    }
+  };
+
+  // console.log(typeof(Tasks));
+
   useEffect(() => {
     Fetchdata();
   }, []);
@@ -167,10 +260,17 @@ const Feed: React.FC = () => {
         <div id="1" className="flex justify-center">
           <main
             className="flex flex-col justify-center"
-            style={{ maxWidth: "750px", minWidth:"538px" }}
+            style={{ maxWidth: "750px", minWidth: "538px" }}
           >
+            <Button onClick={FetchAttemptsData}> get attempts</Button>
+            <Button onClick={FetchAndProc}>Fetch and proc</Button>
             {data.map((project: Project, index: number) => (
-              <Card id="1" key={index} style={{ marginBottom: "20px", padding:"5px" }}>
+              <Card
+                onClick={() => alert("hello")}
+                id="1"
+                key={index}
+                style={{ marginBottom: "20px", padding: "5px" }}
+              >
                 <CardHeader>
                   <CardTitle>{project.title}</CardTitle>
                   <CardDescription>
@@ -180,7 +280,7 @@ const Feed: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   {project.tasks.map((task: Task, taskIndex: number) => (
-                    <p key={taskIndex}>
+                    <div key={taskIndex}>
                       <span>{task.tasktitle}</span>
                       {task.isdone ? (
                         <Badge>Done</Badge>
@@ -189,14 +289,28 @@ const Feed: React.FC = () => {
                           <Badge>Not done</Badge>
                           <Button
                             onClick={() =>
-                              MarkAsDone(project.title, task.tasktitle)
+                              MarkAsDone(
+                                project.projectid,
+                                taskIndex.toString()
+                              )
                             }
                           >
                             Mark as done
                           </Button>
+                          <Button
+                            onClick={() =>
+                              CreateAttempt(
+                                project.projectid,
+                                taskIndex,
+                                task.tasktitle
+                              )
+                            }
+                          >
+                            Attempt
+                          </Button>
                         </>
                       )}
-                    </p>
+                    </div>
                   ))}
                 </CardContent>
               </Card>

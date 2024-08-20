@@ -22,6 +22,8 @@ import { ethers } from "ethers";
 import TaskCon from "../../artifacts-zk/contracts/TaskCon.sol/TaskCon.json";
 import BoxReveal from "@/components/magicui/box-reveal";
 import Meteors from "@/components/magicui/meteors";
+import Attempts from "@/actions/get_attempts";
+import SparklesText from "@/components/magicui/sparkles-text";
 
 const web3 = new Web3(
   "https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a"
@@ -70,6 +72,10 @@ export default function Home() {
         {isClient && <ProjectForm contractInstance={contract} account={""} />}
       </main>
       <Feed />
+      <Attempts />
+      <div className="flex justify-center pt-30">
+        <SparklesText text="Footer"  className="pt-30"/>
+      </div>
       {/* <EditProjectTitle/> */}
     </>
   );
