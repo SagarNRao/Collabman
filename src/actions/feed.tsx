@@ -31,8 +31,8 @@ interface Task {
 }
 
 interface Attempt {
-  projectId: number;
-  taskId: number;
+  projectid: string;
+  taskid: string;
   tasktitle: string;
   collaborator: string;
   status: boolean;
@@ -47,7 +47,7 @@ const Tasks: {
   title: string;
   desc: string;
   isDone: boolean;
-  attempt: Attempt;
+  attempt: Attempt[];
 }[] = [];
 const TaskTitle: string[] = [];
 const TaskDesc: string[] = [];
@@ -91,11 +91,11 @@ const Feed = () => {
         const result = await Contract.getattempts();
         console.log(result);
         const parsedData = JSON.parse(result);
-        console.log("parsed data: ",parsedData);
-        parsedData.forEach((attempt:Attempt) => {
+        console.log("parsed data: ", parsedData);
+        parsedData.forEach((attempt: Attempt) => {
           Attempts.push({
-            projectId: attempt.projectId,
-            taskId: attempt.taskId,
+            projectid: attempt.projectid,
+            taskid: attempt.taskid,
             tasktitle: attempt.tasktitle,
             collaborator: attempt.collaborator,
             status: attempt.status,
@@ -103,7 +103,6 @@ const Feed = () => {
         });
         setattemptsdata(result);
         console.log("Attempts after parsing: ", Attempts);
-
       } catch (error) {
         console.error("Error getting feed: ", error);
       }
@@ -134,52 +133,109 @@ const Feed = () => {
     }
   };
 
-  async function FetchAndProc() {
-    await FetchAttemptsData();
+  // async function FetchAndProc() {
+  //   try {
+  //     if (data && attemptsdata) {
+  //       data.forEach((project: Project) => {
+  //         ProjectTitles.push(project.title);
+  //         ProjectDescs.push(project.description);
+  //         Urls.push(project.url);
+  //         // Add projectid to the array
+  //         ProjectIds.push(project.projectid);
 
+  //         project.tasks.forEach((task: Task) => {
+  //           TaskTitle.push(task.tasktitle);
+  //           TaskDesc.push(task.description);
+  //           TaskStatus.push(task.isdone);
+
+  //           if (!Attempts) {
+  //             console.log("Attempts is empty");
+  //           } else {
+  //             console.log("Ye");
+  //           }
+
+  //           try {
+  //             for (let i = 0; i < Attempts.length; i++) {
+  //               if (!Attempts[i].projectid) {
+  //                 console.log("empty projectid");
+  //               } else if (!Attempts[i].tasktitle) {
+  //                 console.log("empty tasktitle");
+  //               }
+  //               else{
+  //                 console.log("ye")
+  //               }
+
+  //               const matchingAttempts = Attempts.filter(
+  //                 (attempt) =>
+  //                   attempt.projectid.toString() === project.projectid &&
+  //                   attempt.tasktitle.toString() === task.tasktitle
+  //               );
+                
+  //               if (matchingAttempts.length > 0) {
+  //                 Tasks.push({
+  //                   title: task.tasktitle,
+  //                   desc: task.description,
+  //                   isDone: task.isdone,
+  //                   attempt: matchingAttempts, // Assign the array of matching attempts
+  //                 });
+
+  //                 console.log("Tasks: ", Tasks);
+  //               } else {
+  //                 console.log("Processing failed");
+  //               }
+  //             }
+  //           } catch (error) {
+  //             console.log("error processing: ", error);
+  //           }
+  //         });
+  //       });
+  //     } else {
+  //     }
+  //   } catch {}
+  // }
+
+  async function FetchAndProc() {
     try {
       if (data && attemptsdata) {
         data.forEach((project: Project) => {
           ProjectTitles.push(project.title);
           ProjectDescs.push(project.description);
           Urls.push(project.url);
-          // Add projectid to the array
           ProjectIds.push(project.projectid);
-
+  
           project.tasks.forEach((task: Task) => {
             TaskTitle.push(task.tasktitle);
             TaskDesc.push(task.description);
             TaskStatus.push(task.isdone);
+  
+            const matchingAttempts = Attempts.filter(
+              (attempt) =>
+                attempt.projectid.toString() === project.projectid &&
+                attempt.tasktitle.toString() === task.tasktitle
+            );
+  
+            const existingTaskIndex = Tasks.findIndex(
+              (t) => t.title === task.tasktitle && t.desc === task.description
+            );
+  
+            if (existingTaskIndex === -1) {
+              Tasks.push({
+                title: task.tasktitle,
+                desc: task.description,
+                isDone: task.isdone,
+                attempt: matchingAttempts,
+              });
 
-            console.log("Before ree: ");
-
-            try {
-              for (let i = 0; i < Attempts.length; i++) {
-                if (
-                  Attempts[i].projectId.toString() == project.projectid &&
-                  Attempts[i].tasktitle.toString() == task.tasktitle
-                ) {
-                  Tasks.push({
-                    title: task.tasktitle,
-                    desc: task.description,
-                    isDone: task.isdone,
-                    attempt: Attempts[i],
-                  });
-
-                  console.log("Attempts: ", Attempts);
-                } else {
-                  console.log("no");
-                }
-              }
-            } catch (error) {
-              console.log("error processing: ", error);
+              console.log(Tasks);
+            } else {
+              Tasks[existingTaskIndex].attempt = matchingAttempts;
             }
           });
         });
-      } else {
       }
     } catch {}
   }
+
   const MarkAsDone = async (ProjectId: string, taskTitle: string) => {
     const sender = (window as any).ethereum.selectedAddress.toString();
     console.log("Task Title:", taskTitle);
@@ -227,7 +283,7 @@ const Feed = () => {
 
   const CreateAttempt = async (
     ProjectId: string,
-    TaskId: number,
+    TaskId: string,
     TaskTitle: string
   ) => {
     const Collaborator = (window as any).ethereum.selectedAddress.toString();
@@ -301,7 +357,7 @@ const Feed = () => {
                             onClick={() =>
                               CreateAttempt(
                                 project.projectid,
-                                taskIndex,
+                                taskIndex.toString(),
                                 task.tasktitle
                               )
                             }
