@@ -24,14 +24,14 @@ interface Project {
   description: string;
   url: string;
   tasks: Task[];
-  ownerman: "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b";
+  ownerman: string;
 }
 
 interface Task {
   tasktitle: string;
   description: string;
   isdone: number;
-  ownerman: "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b";
+  ownerman: string;
   collaborator: string;
 }
 
@@ -56,12 +56,13 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
   ]);
 
   const handleAddTask = () => {
+    const Owner = (window as any).ethereum.selectedAddress.toString();
+
     const newTask: Task = {
       tasktitle: newTaskTitle,
       description: newTaskDescription,
       isdone: 0,
-      ownerman:
-        "0x89546b75e0e91b41938e14fecfd8228f2ddf9182ecb2fc38e7f0f0f31db6b17b",
+      ownerman: Owner,
       collaborator: "",
     };
     setTasks([...tasks, newTask] as [Task, ...Task[]]);
@@ -103,13 +104,14 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
       // const posttitle = title;
       // const postdescription = description;
       // const posturl = url;
+      const Owner = (window as any).ethereum.selectedAddress.toString();
 
       const tx = await contract.addProject(
         title,
         description,
         url,
         tasks,
-        "0xe30c9B6974fb0a1469D645569700C9591E041394"
+        Owner
       );
       console.log("Transaction successful:", tx);
 
