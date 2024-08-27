@@ -19,7 +19,7 @@
 # misc
 .DS_Store
 *.pem
-/hardhat.config.js
+hardhat.config.js
 
 # debug
 npm-debug.log*

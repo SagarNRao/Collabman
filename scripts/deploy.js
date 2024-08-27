@@ -1,8 +1,4 @@
-// const { ethers } = require("hardhat");
-// const { JsonRpcProvider } = require("@ethersproject/providers");
-
-// // Ensure that the provider is correctly initialized
-// const provider = new JsonRpcProvider("https://sepolia.infura.io/v3/e84a2946755345209aa59f4a1645f14a");
+const { ethers } = require("hardhat");
 
 async function main() {
     // Ensure the Hardhat Runtime Environment is correctly imported
@@ -13,22 +9,20 @@ async function main() {
     const [deployer] = await ethers.getSigners();
 
     // Deploy your contract (replace with your actual contract factory)
-    const MyContract = await ethers.getContractFactory("TaskCon"); // Replace with your contract name
-    const myContract = await MyContract.deploy();
-
-    // const MyTokenContract = await ethers.getContractFactory("MyTokenContract"); // Replace with your contract name
-    // const myTokenContract = await MyTokenContract.deploy();
+    const TaskCon = await ethers.getContractFactory("TaskCon"); // Replace with your contract name
+    const TaskContract = await TaskCon.deploy();
 
     // Wait for deployment confirmation
-    await myContract.deployed();
-    // await myTokenContract.deployed();
+    await TaskContract.deployed();
 
-    console.log("TaskCon deployed at:", myContract.address);
-    console.log("TaskCon Transaction Hash: ", myContract.deployTransaction.hash);
-    console.log("")
-    // console.log("MyTokenContract deployed at:", myTokenContract.address);
-    // console.log("MyTokenContract Transaction Hash: ", myTokenContract.deployTransaction.hash);
-    // console.log("Deployer's address:", deployer.address);
+    const depositTx = await TaskContract.deposit({ value: ethers.utils.parseEther("1.0") });
+    await depositTx.wait();
+
+    console.log("TaskCon deployed at:", TaskContract.address);
+    console.log("TaskCon Transaction Hash: ", TaskContract.deployTransaction.hash);
+
+    const balance = await TaskCon.getContractBalance();
+    console.log("Contract balance: ", ethers.utils.formatEther(balance));
 }
 
 main()

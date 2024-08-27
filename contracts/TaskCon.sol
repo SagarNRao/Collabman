@@ -2,20 +2,25 @@
 
 pragma solidity ^0.8.19;
 import "./Strings.sol";
-
-// import "./Tokens.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; // Import the ERC20 interface
+import "./Tokens.sol";
 /**
  * @title TaskCon
  * @dev Store & retrieve value in a variable
  */
 contract TaskCon {
-    address public owner;
+    IERC20 public CollaboratorToken;
     address public tokenaddress;
+
+    address public owner;
     uint256 public Counter;
+
+    mapping(address => uint256) public balances;
 
     constructor() {
         owner = msg.sender;
-        // tokenaddress = address(new MyTokenContract());
+        tokenaddress = address(new MyTokenContract());
+        CollaboratorToken = IERC20(tokenaddress);
         Counter = 0;
     }
 
@@ -49,6 +54,15 @@ contract TaskCon {
 
     event AddProject(address recipient, uint256 projectid);
     event TaskFinished(uint256 projectId, uint256 taskId);
+
+    function deposit() public payable {
+        require(msg.value > 0, "Deposit amount must be greater than zero");
+        balances[msg.sender] += msg.value;
+    }
+
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
 
     function create_attempt(
         uint256 projectId,
@@ -91,11 +105,9 @@ contract TaskCon {
         emit AddProject(msg.sender, Counter);
     }
 
-    function getProjectTasks(uint256 projectId)
-        public
-        view
-        returns (task[] memory)
-    {
+    function getProjectTasks(
+        uint256 projectId
+    ) public view returns (task[] memory) {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
         return projects[projectId - 1].tasks;
     }
@@ -153,12 +165,17 @@ contract TaskCon {
             }
         }
 
+        address collaboratorAddress = parseAddress(collaborator);
+        uint256 rewardAmount = 100;
+        CollaboratorToken.transfer(collaboratorAddress, rewardAmount);
+
         emit TaskFinished(projectId, taskId); // Emit the event
     }
 
-    function editProjectTitle(uint256 projectId, string memory newTitle)
-        public
-    {
+    function editProjectTitle(
+        uint256 projectId,
+        string memory newTitle
+    ) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
         projects[projectId - 1].title = newTitle;
     }
@@ -179,11 +196,9 @@ contract TaskCon {
         return projectsToJson(result);
     }
 
-    function projectsToJson(project[] memory projectsArray)
-        internal
-        pure
-        returns (string memory)
-    {
+    function projectsToJson(
+        project[] memory projectsArray
+    ) internal pure returns (string memory) {
         bytes memory jsonBytes = abi.encodePacked("[");
         for (uint256 i = 0; i < projectsArray.length; i++) {
             jsonBytes = abi.encodePacked(
@@ -198,11 +213,9 @@ contract TaskCon {
         return string(jsonBytes);
     }
 
-    function projectToJson(project memory proj)
-        internal
-        pure
-        returns (string memory)
-    {
+    function projectToJson(
+        project memory proj
+    ) internal pure returns (string memory) {
         bytes memory jsonBytes = abi.encodePacked(
             '{"projectid":"',
             proj.projectid,
@@ -249,11 +262,9 @@ contract TaskCon {
         return attemptsToJson(result);
     }
 
-    function attemptsToJson(attempt[] memory attemptsArray)
-        internal
-        pure
-        returns (string memory)
-    {
+    function attemptsToJson(
+        attempt[] memory attemptsArray
+    ) internal pure returns (string memory) {
         bytes memory jsonBytes = abi.encodePacked("[");
         for (uint256 i = 0; i < attemptsArray.length; i++) {
             jsonBytes = abi.encodePacked(
@@ -268,11 +279,9 @@ contract TaskCon {
         return string(jsonBytes);
     }
 
-    function attemptToJson(attempt memory att)
-        internal
-        pure
-        returns (string memory)
-    {
+    function attemptToJson(
+        attempt memory att
+    ) internal pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -289,5 +298,25 @@ contract TaskCon {
                     "}"
                 )
             );
+    }
+
+    function parseAddress(string memory _a) internal pure returns (address) {
+        bytes memory tmp = bytes(_a);
+        uint160 iaddr = 0;
+        uint160 b1;
+        uint160 b2;
+        for (uint256 i = 2; i < 2 + 2 * 20; i += 2) {
+            iaddr *= 256;
+            b1 = uint160(uint8(tmp[i]));
+            b2 = uint160(uint8(tmp[i + 1]));
+            if ((b1 >= 97) && (b1 <= 102)) b1 -= 87;
+            else if ((b1 >= 65) && (b1 <= 70)) b1 -= 55;
+            else if ((b1 >= 48) && (b1 <= 57)) b1 -= 48;
+            if ((b2 >= 97) && (b2 <= 102)) b2 -= 87;
+            else if ((b2 >= 65) && (b2 <= 70)) b2 -= 55;
+            else if ((b2 >= 48) && (b2 <= 57)) b2 -= 48;
+            iaddr += (b1 * 16 + b2);
+        }
+        return address(iaddr);
     }
 }

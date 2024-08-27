@@ -137,6 +137,9 @@ const Feed = () => {
         // console.log(result);
         const parsedData = JSON.parse(result);
         setdata(parsedData);
+
+        const balance = await Contract.getContractBalance();
+        console.log(balance);
       } catch (error) {
         console.error("Error getting feed: ", error);
       }
@@ -207,46 +210,23 @@ const Feed = () => {
     } catch {}
   }
 
-  const MarkAsDone = async (ProjectId: string, taskTitle: string) => {
+  const MarkAsDone = async (ProjectId: string, TaskId: string) => {
     const sender = (window as any).ethereum.selectedAddress.toString();
-    console.log("Task Title:", taskTitle);
     console.log("Sender:", sender);
 
+    const PId = parseInt(ProjectId);
+    let TId = parseInt(TaskId);
+    console.log("Task Id before increment attempt:", TaskId);
+    TId++;
+    console.log("Task Id:", TaskId);
+
+    // const
+
     try {
-      const tx = await ContractWithSigner.finishtask(1, 1);
+      const tx = await ContractWithSigner.finishtask(PId, TId, sender);
       console.log(tx);
       console.log(tx.receipt);
       console.log(tx.data);
-      // Find the index of the t with the given title
-      if (tx) {
-        const taskIndex = TaskTitle.indexOf(taskTitle);
-
-        // Update the t status
-        TaskStatus[taskIndex] = true;
-
-        // Update the T array
-        Tasks[taskIndex].isDone = true;
-
-        // Update the data state
-        const newData = [...data];
-        newData.forEach((project: Project) => {
-          project.tasks.forEach((task: Task, taskIndex: number) => {
-            if (task.tasktitle === taskTitle) {
-              console.log(task);
-              task.isdone = true;
-              console.log(task);
-            }
-          });
-        });
-        setdata(newData);
-        console.log("New data ", newData);
-      } else {
-        console.log("Unidentified error");
-      }
-
-      // Call the finishtask function on the contract
-
-      // Call the Fetchdata function to update the data state
     } catch (error) {
       console.log("error:", error);
     }
@@ -386,16 +366,7 @@ const Feed = () => {
                       ) : (
                         <>
                           <Badge>Not done</Badge>
-                          <Button
-                            onClick={() =>
-                              MarkAsDone(
-                                project.projectid,
-                                taskIndex.toString()
-                              )
-                            }
-                          >
-                            Mark as done
-                          </Button>
+
                           <Button
                             onClick={() =>
                               CreateAttempt(
@@ -424,14 +395,27 @@ const Feed = () => {
                         )
                         .map((attempt: Attempt, attemptIndex: number) => (
                           <span key={attemptIndex}>
-                            {attempt.tasktitle}: {attempt.collaborator} - -{" "}
+                            {attempt.tasktitle}: {attempt.collaborator}{" "}
                             {attempt.status ? (
                               <Badge>Done</Badge>
                             ) : (
-                              <Badge>In Progress</Badge>
+                              <>
+                                <Badge>In Progress</Badge>
+                                <Button
+                                  onClick={() =>
+                                    MarkAsDone(
+                                      attempt.projectid,
+                                      attempt.taskid
+                                    )
+                                  }
+                                >
+                                  Mark as done
+                                </Button>
+                              </>
                             )}
                           </span>
                         ))}
+                      {"\n"}
                     </SheetContent>
                   </Sheet>
                 </CardFooter>

@@ -37,47 +37,9 @@
         "Strings"
       ]
     },
-    "C:\\Projects\\Web\\collabman\\contracts\\TaskCon.sol": {
-      "lastModificationDate": 1723909709352,
-      "contentHash": "6009b37f47a91356fc32c78ddf495cdc",
-      "sourceName": "contracts/TaskCon.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./Strings.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "TaskCon"
-      ]
-    },
     "C:\\Projects\\Web\\collabman\\contracts\\Tokens.sol": {
-      "lastModificationDate": 1722264259224,
-      "contentHash": "959e67f846e88145e58ced36ec1459be",
+      "lastModificationDate": 1724649819377,
+      "contentHash": "e8c448b390fec192e883af1110dfbb72",
       "sourceName": "contracts/Tokens.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -300,6 +262,84 @@
       ],
       "artifacts": [
         "IERC20Metadata"
+      ]
+    },
+    "C:\\Projects\\Web\\collabman\\contracts\\TokenTest.sol": {
+      "lastModificationDate": 1724650372699,
+      "contentHash": "07d9d6ad0f454128a7d076b70c1651cb",
+      "sourceName": "contracts/TokenTest.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "TestTokenReward"
+      ]
+    },
+    "C:\\Projects\\Web\\collabman\\contracts\\TaskCon.sol": {
+      "lastModificationDate": 1724732082998,
+      "contentHash": "e7d09ce63e75dc1d768cefaeee58f0e6",
+      "sourceName": "contracts/TaskCon.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Strings.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "./Tokens.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "TaskCon"
       ]
     }
   }

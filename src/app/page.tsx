@@ -16,13 +16,13 @@ import { QueryClient } from "@tanstack/react-query";
 // import AddProject from "@/actions/addproject";
 import ProjectForm from "@/actions/addproject";
 import Feed from "@/actions/feed";
-import EditProjectTitle from "@/actions/edittitle";
-import ReadContract from "@/actions/read";
+// import EditProjectTitle from "@/actions/edittitle";
+// import ReadContract from "@/actions/read";
 import { ethers } from "ethers";
 import TaskCon from "../../artifacts-zk/contracts/TaskCon.sol/TaskCon.json";
 import BoxReveal from "@/components/magicui/box-reveal";
 import Meteors from "@/components/magicui/meteors";
-import Attempts from "@/actions/get_attempts";
+// import Attempts from "@/actions/get_attempts";
 import SparklesText from "@/components/magicui/sparkles-text";
 
 const web3 = new Web3(
@@ -72,7 +72,7 @@ export default function Home() {
         {isClient && <ProjectForm contractInstance={contract} account={""} />}
       </main>
       <Feed />
-      <Attempts />
+      {/* <Attempts /> */}
       <div className="flex justify-center pt-30">
         <SparklesText text="Footer"  className="pt-30"/>
       </div>
