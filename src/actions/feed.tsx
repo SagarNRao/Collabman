@@ -39,6 +39,7 @@ interface Task {
   isdone: boolean;
   ownerman: string;
   attempt: Attempt[];
+  reward: number;
 }
 
 interface Attempt {
@@ -58,6 +59,7 @@ export const Tasks: {
   title: string;
   desc: string;
   isDone: boolean;
+  reward: number;
   attempt: Attempt[];
 }[] = [];
 export const TaskTitle: string[] = [];
@@ -134,7 +136,7 @@ const Feed = () => {
 
       try {
         const result = await Contract.getfeed();
-        // console.log(result);
+        console.log(result);
         const parsedData = JSON.parse(result);
         setdata(parsedData);
 
@@ -143,8 +145,8 @@ const Feed = () => {
       } catch (error) {
         console.error("Error getting feed: ", error);
       }
-    } catch {
-      console.log("oops");
+    } catch (error) {
+      console.log("oops: ", error);
     } finally {
       setLoading(false);
     }
@@ -192,6 +194,7 @@ const Feed = () => {
                     title: task.tasktitle,
                     desc: task.description,
                     isDone: task.isdone,
+                    reward: task.reward,
                     attempt: matchingAttempts, // Assign the array of matching attempts
                   });
 
@@ -258,11 +261,18 @@ const Feed = () => {
 
   useEffect(() => {
     Fetchdata();
+    console.log("use effect");
+    FetchAttemptsData;
   }, []);
 
   const handleSheetTriggerClick = (attempts: Attempt[]) => {
     setSelectedAttempts(attempts);
   };
+
+  if (!attemptsdata || !data) {
+    FetchAttemptsData();
+    Fetchdata();
+  }
 
   return (
     <>
@@ -275,79 +285,9 @@ const Feed = () => {
             style={{ maxWidth: "750px", minWidth: "538px" }}
           >
             <Button onClick={FetchAttemptsData}> get attempts</Button>
-            <Button onClick={FetchAndProc}>Fetch and proc</Button>
-            {/* {data.map((project: Project, index: number) => (
-              <Card
-                id="1"
-                key={index}
-                style={{ marginBottom: "20px", padding: "5px" }}
-              >
-                <CardHeader>
-                  <CardTitle>{project.title}</CardTitle>
-                  <CardDescription>
-                    re
-                    {project.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {project.tasks.map((task: Task, taskIndex: number) => (
-                    <div key={taskIndex}>
-                      <span>{task.tasktitle}</span>
-                      {task.isdone ? (
-                        <Badge>Done</Badge>
-                      ) : (
-                        <>
-                          <Badge>Not done</Badge>
-                          <Button
-                            onClick={() =>
-                              MarkAsDone(
-                                project.projectid,
-                                taskIndex.toString()
-                              )
-                            }
-                          >
-                            Mark as done
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              CreateAttempt(
-                                project.projectid,
-                                taskIndex.toString(),
-                                task.tasktitle
-                              )
-                            }
-                          >
-                            Attempt
-                          </Button>
-                          <Sheet>
-                            <SheetTrigger asChild>
-                              <Button variant="outline">Open</Button>
-                            </SheetTrigger>
-                            <SheetContent>
-                              {attemptsdata
-                                .filter(
-                                  (attempt) =>
-                                    attempt.projectid === project.projectid &&
-                                    attempt.taskid === taskIndex.toString()
-                                )
-                                .map(
-                                  (attempt: Attempt, attemptIndex: number) => (
-                                    <span key={attemptIndex}>
-                                      {attempt.collaborator}
-                                    </span>
-                                  )
-                                )}
-                            </SheetContent>
-                          </Sheet>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))} */}
 
-            {data.map((project: Project, index: number) => (
+            {/* {data ? (})} */}
+            {/* {data.map((project: Project, index: number) => (
               <Card
                 id="1"
                 key={index}
@@ -359,28 +299,43 @@ const Feed = () => {
                 </CardHeader>
                 <CardContent>
                   {project.tasks.map((task: Task, taskIndex: number) => (
-                    <div key={taskIndex}>
-                      <span>{task.tasktitle}</span>
-                      {task.isdone ? (
-                        <Badge>Done</Badge>
-                      ) : (
-                        <>
-                          <Badge>Not done</Badge>
-
-                          <Button
-                            onClick={() =>
-                              CreateAttempt(
-                                project.projectid,
-                                taskIndex.toString(),
-                                task.tasktitle
-                              )
-                            }
-                          >
-                            Attempt
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    <>
+                      <div
+                        key={taskIndex}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex-col">
+                          <span>{task.tasktitle}</span>
+                          {task.isdone ? (
+                            <div>
+                              <Badge>Done</Badge>
+                            </div>
+                          ) : (
+                            <div>
+                              <Badge>Not done</Badge>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          {!task.isdone ? (
+                            <Button
+                              onClick={() =>
+                                CreateAttempt(
+                                  project.projectid,
+                                  taskIndex.toString(),
+                                  task.tasktitle
+                                )
+                              }
+                            >
+                              Attempt
+                            </Button>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-1"></div>
+                    </>
                   ))}
                 </CardContent>
                 <CardFooter>
@@ -389,12 +344,13 @@ const Feed = () => {
                       <Button variant="outline">View Attempts</Button>
                     </SheetTrigger>
                     <SheetContent>
+                      <SheetTitle>Attempts</SheetTitle>
                       {attemptsdata
                         .filter(
                           (attempt) => attempt.projectid === project.projectid
                         )
                         .map((attempt: Attempt, attemptIndex: number) => (
-                          <span key={attemptIndex}>
+                          <div key={attemptIndex}>
                             {attempt.tasktitle}: {attempt.collaborator}{" "}
                             {attempt.status ? (
                               <Badge>Done</Badge>
@@ -413,14 +369,114 @@ const Feed = () => {
                                 </Button>
                               </>
                             )}
-                          </span>
+                          </div>
                         ))}
                       {"\n"}
                     </SheetContent>
                   </Sheet>
                 </CardFooter>
               </Card>
-            ))}
+            ))} */}
+
+            {data ? (
+              data.map((project: Project, index: number) => (
+                <Card
+                  id="1"
+                  key={index}
+                  style={{ marginBottom: "20px", padding: "5px" }}
+                >
+                  <CardHeader>
+                    <CardTitle>{project.title}</CardTitle>
+                    <CardDescription>{project.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {project.tasks.map((task: Task, taskIndex: number) => (
+                      <>
+                        <div
+                          key={taskIndex}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex-col">
+                            <span>{task.tasktitle}</span>
+                            {task.isdone ? (
+                              <div>
+                                <Badge>Done</Badge>
+                              </div>
+                            ) : (
+                              <div>
+                                <Badge>Not done</Badge>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            {!task.isdone ? (
+                              <>
+                                <Button
+                                  onClick={() =>
+                                    CreateAttempt(
+                                      project.projectid,
+                                      taskIndex.toString(),
+                                      task.tasktitle
+                                    )
+                                  }
+                                >
+                                  Attempt
+                                </Button>
+                                <Badge>
+                                  {task.reward}
+                                </Badge>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-1"></div>
+                      </>
+                    ))}
+                  </CardContent>
+                  <CardFooter>
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline">View Attempts</Button>
+                      </SheetTrigger>
+                      <SheetContent>
+                        <SheetTitle>Attempts</SheetTitle>
+                        {attemptsdata
+                          .filter(
+                            (attempt) => attempt.projectid === project.projectid
+                          )
+                          .map((attempt: Attempt, attemptIndex: number) => (
+                            <div key={attemptIndex}>
+                              {attempt.tasktitle}: {attempt.collaborator}{" "}
+                              {attempt.status ? (
+                                <Badge>Done</Badge>
+                              ) : (
+                                <>
+                                  <Badge>In Progress</Badge>
+                                  <Button
+                                    onClick={() =>
+                                      MarkAsDone(
+                                        attempt.projectid,
+                                        attempt.taskid
+                                      )
+                                    }
+                                  >
+                                    Mark as done
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        {"\n"}
+                      </SheetContent>
+                    </Sheet>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <p>Loading...</p>
+            )}
           </main>
         </div>
       )}

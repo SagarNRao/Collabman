@@ -47,6 +47,7 @@ contract TaskCon {
         uint256 isdone;
         string ownerman;
         string collaborator;
+        uint256 reward;
     }
 
     project[] public projects;
@@ -116,7 +117,8 @@ contract TaskCon {
         uint256 projectId,
         string memory tasktitle,
         string memory description,
-        string memory ownerman
+        string memory ownerman,
+        uint rewardamount
     ) public {
         require(projectId > 0 && projectId <= Counter, "Invalid project ID");
 
@@ -125,7 +127,8 @@ contract TaskCon {
             description: description,
             isdone: 0,
             ownerman: ownerman,
-            collaborator: ""
+            collaborator: "",
+            reward: rewardamount
         });
 
         // for (uint i = 0;i< _attempts.length;i++){
@@ -166,7 +169,7 @@ contract TaskCon {
         }
 
         address collaboratorAddress = parseAddress(collaborator);
-        uint256 rewardAmount = 100;
+        uint256 rewardAmount = tasks[taskId - 1].reward;
         CollaboratorToken.transfer(collaboratorAddress, rewardAmount);
 
         emit TaskFinished(projectId, taskId); // Emit the event
@@ -219,6 +222,8 @@ contract TaskCon {
         bytes memory jsonBytes = abi.encodePacked(
             '{"projectid":"',
             proj.projectid,
+            '","description":"',
+            proj.description,
             '","title":"',
             proj.title,
             '","tasks":['
@@ -239,8 +244,12 @@ contract TaskCon {
                 abi.encodePacked(
                     '{"tasktitle":"',
                     tsk.tasktitle,
+                    '","taskdesc":"',
+                    tsk.description,
                     '","isdone":',
                     tsk.isdone == 1 ? "true" : "false",
+                    ',"reward":',
+                    Strings.uintToString(tsk.reward),
                     "}"
                 )
             );

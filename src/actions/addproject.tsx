@@ -33,6 +33,7 @@ interface Task {
   isdone: number;
   ownerman: string;
   collaborator: string;
+  reward: number;
 }
 
 interface Props {
@@ -50,9 +51,10 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [reward, setReward] = useState<number>(0);
 
   const [cardContents, setCardContents] = useState([
-    { title: "", description: "" },
+    { title: "", description: "", reward: 0 },
   ]);
 
   const handleAddTask = () => {
@@ -64,12 +66,16 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
       isdone: 0,
       ownerman: Owner,
       collaborator: "",
+      reward: reward,
     };
     setTasks([...tasks, newTask] as [Task, ...Task[]]);
     setNewTaskTitle("");
     setNewTaskDescription("");
 
-    setCardContents([...cardContents, { title: "", description: "" }]);
+    setCardContents([
+      ...cardContents,
+      { title: "", description: "", reward: 0 },
+    ]);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -187,6 +193,19 @@ const ProjectForm: React.FC<Props> = ({ contractInstance, account }) => {
                       }}
                       placeholder="Task description"
                     />
+                    <div className="p-2"></div>
+                    <Input
+                      // typ
+                      // value={cardContent.reward}
+                      onChange={(e) => {
+                        const newCardContents = [...cardContents];
+                        newCardContents[index].reward = parseInt(
+                          e.target.value
+                        );
+                        setCardContents(newCardContents);
+                        setReward(parseInt(e.target.value));
+                      }}
+                    ></Input>
                     <div className="p-2"></div>
                     <Button type="button" onClick={handleAddTask}>
                       Add Task
